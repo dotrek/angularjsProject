@@ -6,33 +6,32 @@ movieApp.controller('listController', ['$scope', '$http', '$routeParams',
     function ($scope, $http, $routeParams) {
 
         var page = 0,
-            $year=2017,
+            $year = 2017,
             $url = $apiEndpoint,
-            $isAll = false;
+            $service = "search/movie";
         $scope.moviesList = [];
 
         // Set up URL and Page Heading
         switch ($routeParams.page) {
             case 'now-playing':
-                $url += 'movie/now_playing';
+                $service = 'movie/now_playing';
                 $scope.pageHeading = 'Now Playing in Theaters';
                 break;
             case 'top-box-office':
-                $url += 'discover/movie?primary_release_year=' + $year + '&sort_by=revenue.desc';
+                $service = 'discover/movie?primary_release_year=' + $year + '&sort_by=revenue.desc';
                 $scope.pageHeading = 'Highest Grossing Movies of 2017';
                 break;
             case 'top-rated':
-                $url += 'movie/top_rated';
+                $service = 'movie/top_rated';
                 $scope.pageHeading = 'Top Rated Movies';
                 break;
             case 'popular':
-                $url += 'movie/popular';
+                $service = 'movie/popular';
                 $scope.pageHeading = 'Popular Movies';
                 break;
             default:
-                $url += 'search/movie';
-                $isAll=true;
-                $scope.pageHeading='All Movies'
+                $service = 'discover/movie';
+                $scope.pageHeading = 'All Movies'
 
         }
 
@@ -41,15 +40,23 @@ movieApp.controller('listController', ['$scope', '$http', '$routeParams',
             var $responsePromise;
 
             // Get data from API
-            $responsePromise = $http({
-                method: 'GET',
-                url: $url,
-                params: {
-                    api_key: $apiKey,
-                    page: ++page
-                }
-            });
-
+            if ($scope.query == null)
+                $responsePromise = $http({
+                    method: 'GET',
+                    url: $url + $service,
+                    params: {
+                        api_key: $apiKey,
+                    }
+                });
+            else
+                $responsePromise = $http({
+                    method: 'GET',
+                    url: $url + "search/movie",
+                    params: {
+                        api_key: $apiKey,
+                        query: $scope.query
+                    }
+                });
             // Process requests
             $responsePromise.then(
                 function successCallback(response) {
